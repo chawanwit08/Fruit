@@ -44,7 +44,6 @@
             margin-bottom: 25px;
         }
 
-        /* ปุ่มอัปโหลด */
         .upload-btn-wrapper {
             position: relative;
             overflow: hidden;
@@ -91,7 +90,6 @@
             width: 100%;
         }
 
-        /* กล่องแสดงรูปภาพ */
         .preview-box {
             width: 100%;
             height: 260px;
@@ -119,7 +117,6 @@
             font-size: 0.95rem;
         }
 
-        /* แถบแสดงผลลัพธ์ */
         #label-container {
             text-align: left;
             display: flex;
@@ -172,7 +169,6 @@
 
     <div id="status" class="status-text">กำลังโหลดโมเดล AI...</div>
 
-    <!-- ปุ่มเลือกไฟล์ -->
     <div class="upload-btn-wrapper">
         <button class="btn-upload" id="upload-btn" disabled>
             📁 เลือกรูปภาพ
@@ -180,22 +176,19 @@
         <input type="file" id="image-upload" accept="image/*" disabled />
     </div>
 
-    <!-- พื้นที่แสดงตัวอย่างรูปภาพ -->
     <div class="preview-box">
         <span class="placeholder-text" id="placeholder">ยังไม่ได้เลือกรูปภาพ</span>
-        <img id="image-preview" src="#" alt="Image Preview" />
+        <img id="image-preview" src="#" alt="Image Preview" crossorigin="anonymous" />
     </div>
 
-    <!-- พื้นที่แสดงผลการทำนาย -->
     <div id="label-container"></div>
 </div>
 
-<!-- TensorFlow.js & Teachable Machine Library -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+<!-- ล็อกเวอร์ชัน Library ให้เสถียรสำหรับ GitHub Pages -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js"></script>
 
 <script type="text/javascript">
-    // ลิงก์โมเดลของมึงจากโค้ดเดิม
     const URL = "https://teachablemachine.withgoogle.com/models/XVRjRyCl8/";
 
     let model, labelContainer, maxPredictions;
@@ -206,7 +199,6 @@
     const statusText = document.getElementById('status');
     const uploadBtn = document.getElementById('upload-btn');
 
-    // โหลดโมเดลทันทีที่เปิดหน้าเว็บ
     async function init() {
         try {
             const modelURL = URL + "model.json";
@@ -217,7 +209,6 @@
 
             labelContainer = document.getElementById("label-container");
 
-            // เปิดใช้งานปุ่มเมื่อโหลดโมเดลเสร็จ
             statusText.innerText = "โมเดลพร้อมใช้งานแล้ว";
             statusText.style.color = "#10b981";
             imageUpload.disabled = false;
@@ -229,7 +220,6 @@
         }
     }
 
-    // ดักจับเมื่อมีการอัปโหลดไฟล์รูปภาพ
     imageUpload.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -240,7 +230,6 @@
             imagePreview.style.display = 'block';
             placeholder.style.display = 'none';
 
-            // รอให้รูปภาพโหลดลงแท็ก <img> สมบูรณ์ก่อนส่งให้โมเดลทำนาย
             imagePreview.onload = async function() {
                 await predict();
             };
@@ -248,20 +237,16 @@
         reader.readAsDataURL(file);
     });
 
-    // ฟังก์ชันทำนายผลจากรูปภาพ
     async function predict() {
         const prediction = await model.predict(imagePreview);
-        
-        // เรียงลำดับผลลัพธ์จากเปอร์เซ็นต์มากไปน้อย
         prediction.sort((a, b) => b.probability - a.probability);
 
-        labelContainer.innerHTML = ""; // ล้างผลลัพธ์เก่า
+        labelContainer.innerHTML = "";
 
         for (let i = 0; i < maxPredictions; i++) {
             const className = prediction[i].className;
             const probability = (prediction[i].probability * 100).toFixed(1);
 
-            // สร้างแถบแสดงผลสวยงาม
             const resultHTML = `
                 <div class="result-item">
                     <div class="result-header">
@@ -277,7 +262,6 @@
         }
     }
 
-    // เริ่มต้นโหลดโมเดลอัตโนมัติ
     window.addEventListener('DOMContentLoaded', init);
 </script>
 
