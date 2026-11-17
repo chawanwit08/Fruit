@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teachable Machine Image Classifier</title>
+    <title>Fruit AI Classifier - Developed by Shadow</title>
     <!-- ฟอนต์ภาษาไทยสวยๆ จาก Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -15,34 +15,90 @@
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            /* พื้นหลังไล่สีโทนผลไม้สดชื่น (พีช - มะนาวอ่อน) */
+            background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 0%, #ffecd2 50%, #fcb69f 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* กราฟิกผลไม้ 4 อย่างตกแต่งพื้นหลัง */
+        .fruit-bg {
+            position: fixed;
+            z-index: 0;
+            opacity: 0.75;
+            pointer-events: none;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.08));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .fruit-1 { top: 8%; left: 8%; width: 90px; animation-delay: 0s; }     /* แอปเปิล */
+        .fruit-2 { top: 12%; right: 10%; width: 100px; animation-delay: 1.5s; } /* กล้วย */
+        .fruit-3 { bottom: 10%; left: 10%; width: 95px; animation-delay: 3s; }  /* ส้ม */
+        .fruit-4 { bottom: 8%; right: 8%; width: 95px; animation-delay: 4.5s; } /* องุ่น */
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
         }
 
         .container {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            padding: 32px 28px;
+            border-radius: 28px;
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.8);
             width: 100%;
-            max-width: 450px;
+            max-width: 460px;
             text-align: center;
+            position: relative;
+            z-index: 1;
         }
 
+        /* แถบไอคอนผลไม้ 4 อย่างด้านบนการ์ด */
+        .fruit-banner {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .fruit-badge {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease;
+        }
+
+        .fruit-badge:hover {
+            transform: scale(1.15) rotate(8deg);
+        }
+
+        .badge-apple { background: #ffe3e3; }
+        .badge-banana { background: #fff3bf; }
+        .badge-orange { background: #ffe8cc; }
+        .badge-grape { background: #f3d9fa; }
+
         h1 {
-            color: #2d3748;
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+            color: #d9480f;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 6px;
         }
 
         p.subtitle {
-            color: #718096;
+            color: #5c6b73;
             font-size: 0.9rem;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
 
         /* ซ่อน input file เดิม */
@@ -50,27 +106,31 @@
             display: none;
         }
 
-        /* ตกแต่งปุ่มอัปโหลด */
+        /* ตกแต่งปุ่มอัปโหลดโทนส้ม-แดงเบอร์รี่ */
         .upload-btn {
-            display: inline-block;
-            background: #4f46e5;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff922b 100%);
             color: white;
-            padding: 12px 24px;
-            border-radius: 10px;
+            padding: 13px 28px;
+            border-radius: 50px;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 6px 18px rgba(255, 107, 107, 0.35);
         }
 
         .upload-btn:hover {
-            background: #4338ca;
+            background: linear-gradient(135deg, #fa5252 0%, #fd7e14 100%);
             transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(255, 107, 107, 0.45);
         }
 
         .upload-btn.disabled {
-            background: #a0aec0;
+            background: #ced4da;
             cursor: not-allowed;
             pointer-events: none;
             box-shadow: none;
@@ -78,17 +138,23 @@
 
         /* พื้นที่แสดงภาพตัวอย่าง */
         .image-preview-box {
-            margin: 24px auto;
+            margin: 22px auto;
             width: 100%;
-            height: 250px;
-            border: 2px dashed #cbd5e0;
-            border-radius: 14px;
+            height: 240px;
+            border: 2.5px dashed #ffa94d;
+            border-radius: 20px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            background-color: #f8fafc;
+            background-color: #fff9f2;
             position: relative;
+            transition: border-color 0.3s ease;
+        }
+
+        .image-preview-box:hover {
+            border-color: #ff6b6b;
         }
 
         .image-preview-box img {
@@ -96,61 +162,174 @@
             max-height: 100%;
             object-fit: contain;
             display: none;
+            border-radius: 14px;
+        }
+
+        .placeholder-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: #e8590c;
         }
 
         .placeholder-text {
-            color: #a0aec0;
             font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.8;
         }
 
         /* ส่วนแสดงผลลัพธ์และแถบเปอร์เซ็นต์ */
         #label-container {
             text-align: left;
-            margin-top: 20px;
+            margin-top: 18px;
         }
 
         .result-item {
             margin-bottom: 14px;
+            background: #fff;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid #ffe8cc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         }
 
         .result-header {
             display: flex;
             justify-content: space-between;
             font-size: 0.95rem;
-            font-weight: 500;
-            color: #2d3748;
+            font-weight: 600;
+            color: #2b2d42;
             margin-bottom: 6px;
+        }
+
+        .class-prob {
+            color: #e8590c;
         }
 
         .progress-bg {
             width: 100%;
             height: 10px;
-            background-color: #edf2f7;
+            background-color: #fff4e6;
             border-radius: 999px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4f46e5, #06b6d4);
+            background: linear-gradient(90deg, #51cf66, #fcc419, #ff6b6b);
             border-radius: 999px;
             width: 0%;
             transition: width 0.5s ease-out;
         }
 
-        .status-text {
+        /* เครดิตด้านล่าง */
+        .footer-credit {
+            margin-top: 24px;
+            padding-top: 14px;
+            border-top: 1px dashed #ffd8a8;
             font-size: 0.85rem;
-            color: #4f46e5;
-            margin-top: 10px;
+            color: #868e96;
             font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-credit span {
+            color: #d9480f;
+            font-weight: 700;
+        }
+
+        /* ซ่อนกราฟิกพื้นหลังบนจอมือถือเล็กๆ เพื่อไม่ให้รก */
+        @media (max-width: 600px) {
+            .fruit-bg {
+                width: 60px !important;
+                opacity: 0.45;
+            }
         }
     </style>
 </head>
 <body>
 
+    <!-- กราฟิกผลไม้ 4 ชนิด ลอยตกแต่งพื้นหลัง -->
+    <!-- 1. แอปเปิล -->
+    <svg class="fruit-bg fruit-1" viewBox="0 0 100 100">
+        <path d="M50 25 C45 10, 30 10, 35 22 C40 28, 48 26, 50 25 Z" fill="#51cf66"/>
+        <path d="M50 25 Q52 12 58 10" stroke="#795548" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M50 30 C25 22, 15 48, 25 72 C33 90, 46 88, 50 84 C54 88, 67 90, 75 72 C85 48, 75 22, 50 30 Z" fill="#ff4d4d"/>
+        <path d="M32 40 C28 48, 28 56, 32 62" stroke="#ff9999" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </svg>
+
+    <!-- 2. กล้วย -->
+    <svg class="fruit-bg fruit-2" viewBox="0 0 100 100">
+        <path d="M22 25 C25 55, 55 82, 85 75 C88 74, 86 68, 82 67 C58 68, 38 48, 32 24 C30 18, 21 20, 22 25 Z" fill="#ffd43b"/>
+        <path d="M24 22 L28 16 L32 23 Z" fill="#795548"/>
+        <path d="M84 71 L89 72 L86 76 Z" fill="#795548"/>
+        <path d="M30 35 C38 52, 55 66, 75 68" stroke="#fff3bf" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+
+    <!-- 3. ส้ม -->
+    <svg class="fruit-bg fruit-3" viewBox="0 0 100 100">
+        <circle cx="50" cy="56" r="32" fill="#ff922b"/>
+        <path d="M50 24 C55 12, 72 14, 66 24 C60 30, 52 26, 50 24 Z" fill="#40c057"/>
+        <circle cx="50" cy="25" r="3" fill="#2b8a3e"/>
+        <circle cx="38" cy="45" r="2" fill="#ffd8a8"/>
+        <circle cx="44" cy="39" r="1.5" fill="#ffd8a8"/>
+        <circle cx="34" cy="53" r="1.5" fill="#ffd8a8"/>
+    </svg>
+
+    <!-- 4. องุ่น -->
+    <svg class="fruit-bg fruit-4" viewBox="0 0 100 100">
+        <path d="M50 22 Q50 10 60 10" stroke="#795548" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M50 22 C38 14, 28 20, 36 28 C42 32, 48 25, 50 22 Z" fill="#51cf66"/>
+        <circle cx="40" cy="38" r="10" fill="#9775fa"/>
+        <circle cx="60" cy="38" r="10" fill="#845ef7"/>
+        <circle cx="50" cy="42" r="10" fill="#b197fc"/>
+        <circle cx="36" cy="54" r="10" fill="#845ef7"/>
+        <circle cx="64" cy="54" r="10" fill="#9775fa"/>
+        <circle cx="50" cy="56" r="10" fill="#7950f2"/>
+        <circle cx="43" cy="70" r="10" fill="#9775fa"/>
+        <circle cx="57" cy="70" r="10" fill="#845ef7"/>
+        <circle cx="50" cy="82" r="9" fill="#7048e8"/>
+    </svg>
+
     <div class="container">
-        <h1>วิเคราะห์รูปภาพด้วย AI</h1>
-        <p class="subtitle">อัปโหลดรูปภาพ 1 รูปเพื่อให้โมเดลประมวลผล</p>
+        <!-- แถบไอคอนกราฟิกผลไม้ทั้ง 4 อย่าง -->
+        <div class="fruit-banner">
+            <!-- แอปเปิล -->
+            <div class="fruit-badge badge-apple" title="แอปเปิล">
+                <svg width="28" height="28" viewBox="0 0 100 100">
+                    <path d="M50 25 C45 10, 30 10, 35 22 C40 28, 48 26, 50 25 Z" fill="#51cf66"/>
+                    <path d="M50 30 C25 22, 15 48, 25 72 C33 90, 46 88, 50 84 C54 88, 67 90, 75 72 C85 48, 75 22, 50 30 Z" fill="#ff4d4d"/>
+                </svg>
+            </div>
+            <!-- กล้วย -->
+            <div class="fruit-badge badge-banana" title="กล้วย">
+                <svg width="28" height="28" viewBox="0 0 100 100">
+                    <path d="M22 25 C25 55, 55 82, 85 75 C88 74, 86 68, 82 67 C58 68, 38 48, 32 24 C30 18, 21 20, 22 25 Z" fill="#fcc419"/>
+                </svg>
+            </div>
+            <!-- ส้ม -->
+            <div class="fruit-badge badge-orange" title="ส้ม">
+                <svg width="28" height="28" viewBox="0 0 100 100">
+                    <circle cx="50" cy="56" r="32" fill="#ff922b"/>
+                    <path d="M50 24 C55 12, 72 14, 66 24 C60 30, 52 26, 50 24 Z" fill="#40c057"/>
+                </svg>
+            </div>
+            <!-- องุ่น -->
+            <div class="fruit-badge badge-grape" title="องุ่น">
+                <svg width="28" height="28" viewBox="0 0 100 100">
+                    <circle cx="40" cy="38" r="11" fill="#9775fa"/>
+                    <circle cx="60" cy="38" r="11" fill="#845ef7"/>
+                    <circle cx="50" cy="54" r="11" fill="#7950f2"/>
+                    <circle cx="42" cy="70" r="10" fill="#9775fa"/>
+                    <circle cx="58" cy="70" r="10" fill="#845ef7"/>
+                    <circle cx="50" cy="82" r="9" fill="#7048e8"/>
+                </svg>
+            </div>
+        </div>
+
+        <h1>วิเคราะห์ผลไม้ด้วย AI</h1>
+        <p class="subtitle">อัปโหลดรูปภาพผลไม้ 1 รูปเพื่อให้โมเดลจำแนกชนิด</p>
 
         <!-- ปุ่มอัปโหลดไฟล์ -->
         <label for="imageUpload" id="uploadBtn" class="upload-btn disabled">
@@ -160,12 +339,24 @@
 
         <!-- กล่องแสดงรูปภาพ -->
         <div class="image-preview-box">
-            <span class="placeholder-text" id="placeholderText">ยังไม่ได้เลือกรูปภาพ</span>
+            <div class="placeholder-content" id="placeholderText">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff922b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="4" ry="4"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <span class="placeholder-text">ยังไม่ได้เลือกรูปภาพผลไม้</span>
+            </div>
             <img id="imagePreview" src="" alt="Uploaded Image">
         </div>
 
         <!-- กล่องแสดงผลลัพธ์การทำนาย -->
         <div id="label-container"></div>
+
+        <!-- เครดิตผู้พัฒนา -->
+        <div class="footer-credit">
+            Developed by <span>Shadow</span>
+        </div>
     </div>
 
     <!-- Scripts ของ TensorFlow และ Teachable Machine -->
@@ -173,7 +364,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
    
     <script type="text/javascript">
-        // ลิงก์โมเดลของคุุณ
+        // ลิงก์โมเดลของคุณ
         const URL = "https://teachablemachine.withgoogle.com/models/BEX6nVcT_/";
 
         let model, labelContainer, maxPredictions;
@@ -189,7 +380,14 @@
 
                 // เปิดใช้งานปุ่มอัปโหลดเมื่อโหลดโมเดลเสร็จ
                 const uploadBtn = document.getElementById("uploadBtn");
-                uploadBtn.innerText = "📁 เลือกรูปภาพ";
+                uploadBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    เลือกรูปภาพผลไม้
+                `;
                 uploadBtn.classList.remove("disabled");
 
                 // เตรียมพื้นที่แสดงผลลัพธ์
